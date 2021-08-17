@@ -1,12 +1,34 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
+import  Display from './../Display/'
 
+const testShow = {
+    //add in appropriate test data structure here.
+    name: 'One Piece',
+    summary: 'Follows the adventures of Monkey D. Luffy and his pirate crew in order to find the greatest treasure ever left by the legendary Pirate, Gold Roger. The famous mystery treasure named "One Piece".',
+    seasons: [
+        {id:0, name: 'Season 1', episodes: []},
+        {id:1, name: 'Season 2', episodes: []}
+    ]
+};
 
+test('renders Display component without any passed in props', ()=>{
+    render(<Display />);
+});
 
+test('Test that when the fetch button is pressed, the show component will display', ()=>{
+    const { rerender } = render(<Display/>);
+    let preShow = screen.queryByText(/One Piece/i);
+    expect(preShow).not.toBeInTheDocument();
 
-
-
-
-
+    rerender(<Display show={ testShow } selectedSeason={ 'none' }/>)
+    
+    let postShow = screen.queryByText(/One Piece/i);
+    console.log(postShow);
+    expect(postShow).toBeTruthy();
+});
 
 
 
@@ -14,7 +36,7 @@
 
 
 ///Tasks:
-//1. Add in nessisary imports and values to establish the testing suite.
+//1. Add in necessary imports and values to establish the testing suite.
 //2. Test that the Display component renders without any passed in props.
 //3. Rebuild or copy a show test data element as used in the previous set of tests.
 //4. Test that when the fetch button is pressed, the show component will display. Make sure to account for the api call and change of state in building your test.
