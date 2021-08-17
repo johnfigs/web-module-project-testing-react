@@ -1,8 +1,11 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import  Display from './../Display/'
+
+import mockFetchShow from './../../api/fetchShow';
+jest.mock('./../../api/fetchShow');
 
 const testShow = {
     //add in appropriate test data structure here.
@@ -18,16 +21,41 @@ test('renders Display component without any passed in props', ()=>{
     render(<Display />);
 });
 
-test('Test that when the fetch button is pressed, the show component will display', ()=>{
-    const { rerender } = render(<Display/>);
-    let preShow = screen.queryByText(/One Piece/i);
-    expect(preShow).not.toBeInTheDocument();
+test('Test that when the fetch button is pressed, the show component will display', async ()=>{
+    mockFetchShow.mockResolvedValueOnce(testShow)
+    render(<Display />);
+    const button = screen.getByRole('button');
+    userEvent.click(button);
 
-    rerender(<Display show={ testShow } selectedSeason={ 'none' }/>)
-    
-    let postShow = screen.queryByText(/One Piece/i);
-    console.log(postShow);
-    expect(postShow).toBeTruthy();
+    const show = await screen.findByTestId('show-container');
+    expect(show).toBeInTheDocument();
+});
+
+test('Renders season options matching fetch return when button is clicked', async () =>{
+    mockFetchShow.mockResolvedValueOnce(testShow);
+
+    render(<Display />);
+    const button = screen.getByRole('button');
+    userEvent.click(button);
+
+    await waitFor(()=> {
+        const seasonOptions = screen.queryAllByTestId('season-option');
+        expect(seasonOptions).toHaveLength(2);
+    })
+});
+
+test('displayFunc is called when fetch button is pressed', async ()=>{
+    mockFetchShow.mockResolvedValueOnce(testShow);
+    const displayFunc = jest.fn();
+
+    render(<Display displayFunc={ displayFunc }/>);
+    const button = screen.getByRole('button');
+    userEvent.click(button);
+
+    await waitFor(()=> {
+        expect(displayFunc).toHaveBeenCalled();
+    })
+
 });
 
 
